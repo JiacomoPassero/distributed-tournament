@@ -11,18 +11,18 @@ public class TournamentNode {
         this.ip_address = ip_address;
         this.port = port;
     }   
-
-    public void clientCreateFile(String path){ 
+    /*Metodo per agire come client per la creazione di un file */
+    public void clientCreateFile(String s_address, int s_port, String path){ 
         try {
-            Socket s = new Socket("localhost", 3000);
+            Socket s = new Socket(s_address, s_port);
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
             //invio messaggio
-            oos.writeObject("CIAO coestai?");
+            oos.writeObject(path);
             oos.flush();
             //ricezione risposta
             ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
             String result = (String)ois.readObject();
-            System.out.println("Client ricevuto: "+result);
+            System.out.println("Risultato operazione: " + result);
 
             s.close();
         } catch (IOException e) {
@@ -32,30 +32,43 @@ public class TournamentNode {
         }
     }
 
-    public void serverCreateFile(String path){
+    /*Metodo per agire come server per la creazione di un file */
+    public void serverCreateFile(){
         try {
             ServerSocket ss;
             Socket clientSocket;
 
             //stabilire connessione
-            ss = new ServerSocket(3000);
-            System.out.println("Server avviato e in attesa...");
+            ss = new ServerSocket(this.port);
+            System.out.println("Attesa richiesta creazione file...");
             clientSocket = ss.accept();
 
-            System.out.print("Server ha ricevuto una richiesta: ");
+            System.out.print("Richiesta creazione file: ");
             ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-            String par = (String)ois.readObject();
-            System.out.println(par);
-            StringBuilder rev = new StringBuilder(par).reverse();
-            
-            String result = rev.toString();
-            ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
+            String file_path = (String)ois.readObject();
+            System.out.println(file_path);
 
-            System.out.println("Server invia " +result);
+            //creazione file
+            String result = "";
+            try{
+                File file = new File(file_path);
+                if(file.createNewFile()){
+                    result = "File creato con successo";
+                }else{
+                    result = "File già esistente";
+                }
+            }catch(IOException e){
+                e.printStackTrace();
+                result = "Errore nella creazione del file";
+            }
+
+            //invio messaggio stringa contenente il risultato
+            ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
             oos.writeObject(result);
             oos.flush();
-            System.out.println("Server fatto!");
+            System.out.println("Operazione completata");
             
+            // chiusura socket
             clientSocket.close();
             ss.close();
         } catch (IOException e) {

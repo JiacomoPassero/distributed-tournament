@@ -1,13 +1,13 @@
 public class ExecuteDemo {
     public static void main(String[] args) {
-        TournamentNode clientNode = new TournamentNode("localhost", 3000);
         TournamentNode serverNode = new TournamentNode("localhost", 3000);
+        TournamentNode clientNode = new TournamentNode("localhost", 3001);
 
         Thread serverThread = new Thread(() -> {
-            serverNode.serverCreateFile(null);
+            serverNode.serverCreateFile();
         });
         Thread clientThread = new Thread(() -> {
-            clientNode.clientCreateFile(null);
+            clientNode.clientCreateFile("localhost", 3000, "file.txt");
         });
 
         serverThread.start();
