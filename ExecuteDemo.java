@@ -1,22 +1,17 @@
+import Tournament.TournamentNode;
+
 public class ExecuteDemo {
     public static void main(String[] args) {
-        TournamentNode serverNode = new TournamentNode("localhost", 3000);
-        TournamentNode clientNode = new TournamentNode("localhost", 3001);
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
 
         Thread serverCreateThread = new Thread(() -> {
-            serverNode.serverCreateFile();
+            serverNode.serverFileOperation();
         });
         Thread clientCreateThread = new Thread(() -> {
-            clientNode.clientCreateFile("localhost", 3000, "file.txt");
+            clientNode.clientFileOperation("file.txt","create");
         });
-        Thread serverDeleteThread = new Thread(() -> {
-            serverNode.serverDeleteFile();
-        });
-        Thread clientDeleteThread = new Thread(() -> {
-            clientNode.clientDeleteFile("localhost", 3000, "file.txt");
-        });
-
-        //synchronization barrier
+        //Test Creazione remota
         try {
             serverCreateThread.start();
             clientCreateThread.start();
@@ -26,7 +21,13 @@ public class ExecuteDemo {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        //Test cancellazione remota
+        Thread serverDeleteThread = new Thread(() -> {
+            serverNode.serverFileOperation();
+        });
+        Thread clientDeleteThread = new Thread(() -> {
+            clientNode.clientFileOperation("file.txt","delete");
+        });
         try {
             serverDeleteThread.start();
             clientDeleteThread.start();
@@ -36,7 +37,6 @@ public class ExecuteDemo {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
     
 }
