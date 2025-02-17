@@ -6,10 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class TournamentClient {
-    private String client_test;
+    //private String client_test;
 
     public TournamentClient(String client_test){
-        this.client_test = client_test;
+        //this.client_test = client_test;
     }
 
     /*Metodo per agire come client per la creazione di un file */
