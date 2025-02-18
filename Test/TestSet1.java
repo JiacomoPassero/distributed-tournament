@@ -1,14 +1,18 @@
 package Test;
 import Tournament.TournamentNode;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 
 import org.junit.Test;
 
@@ -79,6 +83,7 @@ public class TestSet1{
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
         String testString = "linea di test";
 
+        //Creazione del file per il test
         File file = new File("Node1/file.txt");
         try{
             file.createNewFile();
@@ -117,6 +122,87 @@ public class TestSet1{
 
         file.delete();
         assertTrue(check);
+    }
+
+    @Test
+    public void testReadAppend(){
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        String testString = "linea di test";
+        String lettura="";
+
+        //Creazione del file e aggiunta della riga da leggere
+        File file = new File("Node1/file.txt");
+        try{
+            file.createNewFile();
+            FileWriter fw = new FileWriter("Node1/file.txt", true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(testString + "\n");
+                bw.close();
+        }catch(Exception e){
+            e.printStackTrace();
+            fail();
+        }
+        //Lettura remota del fule file
+        Thread serverReadThread = new Thread(() -> {
+            serverNode.serverFileOperation();
+        });
+/*         Thread clientReadThread = new Thread(() -> {
+            lettura = clientNode.clientFileReadline("file.txt","read",0);
+        }); */
+        //Creazione file remota 
+        try {
+            serverReadThread.start();
+            lettura = clientNode.clientFileReadline("file.txt","read",0);
+
+            serverReadThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //chiusura file e assert
+        file.delete();
+        assertEquals(lettura,testString);
+    }
+
+    @Test
+    public void testReadAppendFails(){
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        String testString = "linea di test";
+        String lettura="";
+
+        //Creazione del file e aggiunta della riga da leggere
+        File file = new File("Node1/file.txt");
+        try{
+            file.createNewFile();
+            FileWriter fw = new FileWriter("Node1/file.txt", true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(testString + "\n");
+                bw.close();
+        }catch(Exception e){
+            e.printStackTrace();
+            fail();
+        }
+        //Lettura remota del fule file
+        Thread serverReadThread = new Thread(() -> {
+            serverNode.serverFileOperation();
+        });
+/*         Thread clientReadThread = new Thread(() -> {
+            lettura = clientNode.clientFileReadline("file.txt","read",0);
+        }); */
+        //Creazione file remota 
+        try {
+            serverReadThread.start();
+            lettura = clientNode.clientFileReadline("file.txt","read",0);
+
+            serverReadThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //chiusura file e assert
+        //La lettura dovrebbe dare errore di offset non valido
+        file.delete();
+        assertNotEquals(lettura,"offset non valido");
     }
     
 }

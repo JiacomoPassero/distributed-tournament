@@ -38,4 +38,34 @@ public class TournamentClient {
         }
     }
 
+    public String clientFileReadline(String path, String operation, int offset,String s_address, int s_port){ 
+        String result = "";
+        try {
+            //composizione messaggio
+            String message = operation + ":" + path + ":" + offset;
+
+            //apertura socket server
+            Socket s = new Socket(s_address, s_port);
+            ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+
+            //invio messaggio
+            oos.writeObject(message);
+            oos.flush();
+
+            //ricezione risposta e output risultato
+            ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+             
+            result = (String)ois.readObject();
+            System.out.println("Risultato operazione: " + result);
+
+            s.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 }

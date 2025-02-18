@@ -51,7 +51,22 @@ public class TournamentNode {
         tc.clientFileOperation(path, operation, s_address, s_port);
     }
 
-    /*Metodo per agire come server per la creazione di un file */
+    //versione del metodo per invocare una read che deve quindi restituire un valore letto
+    public String clientFileReadline(String path, String operation, int offset){ 
+        //locate file
+        String location = this.locate(path);
+        //parsing location
+        String s_address = location.split(":")[0];
+        int s_port = Integer.parseInt(location.split(":")[1]);
+        String result;
+
+        result = tc.clientFileReadline(path, operation, offset, s_address, s_port);
+
+        return result;
+    }
+
+
+    /*Metodo per agire come server TODO: renderlo più di un one shot approach*/
     public void serverFileOperation(){
         ts.serverFileOperation();
     }

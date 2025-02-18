@@ -1,5 +1,7 @@
 package Tournament;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class TournamentServer {
     private String ip_address;
@@ -56,6 +59,11 @@ public class TournamentServer {
                     String new_line = message.split(":")[2];
                     result = this.writeFileLine(path, new_line);
                 break;
+                case "read":
+                    //in caso di read (PER ORA) viene passato un offset che indica la riga da leggere
+                    int offset = Integer.parseInt(message.split(":")[2]);
+                    result = this.readFileLine(path, offset);
+                break;
                 default:
                     System.out.println("Operazione non valida");
                     break;
@@ -76,6 +84,7 @@ public class TournamentServer {
             e.printStackTrace();
         }
     }
+
     //creazione file locale
     private String createFile(String file_path) {
         //creazione file
@@ -94,6 +103,7 @@ public class TournamentServer {
         }
         return result;
     }
+    
     //cancellazione file locale
     private String deleteFile(String file_path){
         file_path = this.local_path + file_path;
@@ -116,15 +126,25 @@ public class TournamentServer {
         return result;
     }
     //lettura riga da un file locale
-    private String readFileLine(String file_path, int line){
+    private String readFileLine(String file_path, int offset){
         String result = "";
         file_path = this.local_path + file_path;
         try{
             File file = new File(file_path);
             if(file.exists()){
+                //controllo che l'offset sia valido (non è molto bello aprire u filestream solo per questo, potrebbe valer la pena
+                //riscrivere la lettura)
+                Stream<String> fileStream = Files.lines(Paths.get(file_path));
+                int lines_number = (int) fileStream.count();
+                fileStream.close();
+                if(offset >= lines_number || offset < 0){
+                    return "Offset non valido";
+                }
+                
+                //Se l'offset è valido procedo a leggere la riga del file richiesto
                 //usare un buffer per leggere il file cosi da evitare di leggerlo tutto
                 BufferedReader br = Files.newBufferedReader(Paths.get(file_path));
-                for(int i=0; i<line; i++){
+                for(int i=0; i<offset; i++){
                     br.readLine();
                 }
                 //Assegnazioe riga desiderata
@@ -139,7 +159,8 @@ public class TournamentServer {
         }
         return result;
     }
-    //lettura riga da un file locale
+
+    //scrittura riga da un file locale
     private String writeFileLine(String file_path, String new_line){
         String result = "";
         file_path = this.local_path + file_path;
