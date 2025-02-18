@@ -147,9 +147,6 @@ public class TestSet1{
         Thread serverReadThread = new Thread(() -> {
             serverNode.serverFileOperation();
         });
-/*         Thread clientReadThread = new Thread(() -> {
-            lettura = clientNode.clientFileReadline("file.txt","read",0);
-        }); */
         //Creazione file remota 
         try {
             serverReadThread.start();
@@ -187,9 +184,6 @@ public class TestSet1{
         Thread serverReadThread = new Thread(() -> {
             serverNode.serverFileOperation();
         });
-/*         Thread clientReadThread = new Thread(() -> {
-            lettura = clientNode.clientFileReadline("file.txt","read",0);
-        }); */
         //Creazione file remota 
         try {
             serverReadThread.start();
