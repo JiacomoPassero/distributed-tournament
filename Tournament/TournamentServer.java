@@ -1,7 +1,5 @@
 package Tournament;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -103,7 +101,7 @@ public class TournamentServer {
         }
         return result;
     }
-    
+
     //cancellazione file locale
     private String deleteFile(String file_path){
         file_path = this.local_path + file_path;
