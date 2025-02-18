@@ -1,11 +1,16 @@
 package Tournament;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class TournamentServer {
     private String ip_address;
@@ -43,8 +48,10 @@ public class TournamentServer {
                     result = this.createFile(path);
                     break;
                 case "delete":
-                    System.out.print("Richiesta cancellazione file: " + path);
+                    System.out.println("Richiesta cancellazione file: " + path);
                     result = this.deleteFile(path);
+                break;
+                case "write":
                 break;
                 default:
                     System.out.println("Operazione non valida");
@@ -103,6 +110,54 @@ public class TournamentServer {
                 e.printStackTrace();
                 result = "Errore nella cancellazione del file";
             }
+        return result;
+    }
+    //lettura riga da un file locale
+    private String readFileLine(String file_path, int line){
+        String result = "";
+        file_path = this.local_path + file_path;
+        try{
+            File file = new File(file_path);
+            if(file.exists()){
+                //usare un buffer per leggere il file cosi da evitare di leggerlo tutto
+                BufferedReader br = Files.newBufferedReader(Paths.get(file_path));
+                for(int i=0; i<line; i++){
+                    br.readLine();
+                }
+                //Assegnazioe riga desiderata
+                result = br.readLine();
+            }else{
+                //il file non esiste
+                result = "File non esistente";
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+            result = "Errore nella lettura del file";
+        }
+        return result;
+    }
+    //lettura riga da un file locale
+    private String writeFileLine(String file_path, String new_line){
+        String result = "";
+        file_path = this.local_path + file_path;
+        try{
+            File file = new File(file_path);
+            if(file.exists()){
+                //scrittura file in append tramite buffer writer
+                FileWriter fw = new FileWriter(file_path, true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(new_line);
+                bw.close();
+                //Messaggio successo
+                result = "Riga aggiunta con successo";
+            }else{
+                //il file non esiste
+                result = "File non esistente";
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+            result = "Errore nella scrittura del file";
+        }
         return result;
     }
 }
