@@ -37,6 +37,20 @@ public class TournamentNode {
         tc.clientFileOperation(path, operation, s_address, s_port);
     }
 
+    //overloding del metodo da invocare in caso di write che da si che venga aggiunto un parametro in più alla stringa da inviare
+    public void clientFileOperation(String path, String operation, String new_line){ 
+        //locate file
+        String location = this.locate(path);
+        //parsing location
+        String s_address = location.split(":")[0];
+        int s_port = Integer.parseInt(location.split(":")[1]);
+
+        //aggiungo la nuova linea da scrivere nel file in modo che finisca in coda al comando
+        path = path + ":" + new_line;
+
+        tc.clientFileOperation(path, operation, s_address, s_port);
+    }
+
     /*Metodo per agire come server per la creazione di un file */
     public void serverFileOperation(){
         ts.serverFileOperation();

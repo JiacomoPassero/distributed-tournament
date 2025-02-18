@@ -2,9 +2,13 @@ package Test;
 import Tournament.TournamentNode;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 
 import org.junit.Test;
 
@@ -42,21 +46,12 @@ public class TestSet1{
         TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
 
-        Thread serverCreateThread = new Thread(() -> {
-            serverNode.serverFileOperation();
-        });
-        Thread clientCreateThread = new Thread(() -> {
-            clientNode.clientFileOperation("file.txt","create");
-        });
-        //Creazione file remota 
-        try {
-            serverCreateThread.start();
-            clientCreateThread.start();
-
-            serverCreateThread.join();
-            clientCreateThread.join();
-        } catch (InterruptedException e) {
+        File file = new File("Node1/file.txt");
+        try{
+            file.createNewFile();
+        }catch(Exception e){
             e.printStackTrace();
+            fail();
         }
         //Cancellazione file
         Thread serverDeleteThread = new Thread(() -> {
@@ -74,8 +69,7 @@ public class TestSet1{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        File file = new File("Node1/file.txt");
+        
         assertFalse(file.exists());
     }
 
@@ -85,21 +79,12 @@ public class TestSet1{
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
         String testString = "linea di test";
 
-        Thread serverCreateThread = new Thread(() -> {
-            serverNode.serverFileOperation();
-        });
-        Thread clientCreateThread = new Thread(() -> {
-            clientNode.clientFileOperation("file.txt","create");
-        });
-        //Creazione file remota 
-        try {
-            serverCreateThread.start();
-            clientCreateThread.start();
-
-            serverCreateThread.join();
-            clientCreateThread.join();
-        } catch (InterruptedException e) {
+        File file = new File("Node1/file.txt");
+        try{
+            file.createNewFile();
+        }catch(Exception e){
             e.printStackTrace();
+            fail();
         }
         //Scrittura file
         Thread serverWriteThread = new Thread(() -> {
@@ -118,10 +103,20 @@ public class TestSet1{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        //verifica che il file contenga la riga scritta 
+        boolean check = false;
+        try{
+            BufferedReader bf = new BufferedReader(new FileReader("Node1/file.txt"));
+            String line = bf.readLine();
 
+            check = line.equals(testString);
+            bf.close();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
-        File file = new File("Node1/file.txt");
-        assertFalse(file.exists());
+        file.delete();
+        assertTrue(check);
     }
     
 }

@@ -52,6 +52,9 @@ public class TournamentServer {
                     result = this.deleteFile(path);
                 break;
                 case "write":
+                    //in caso l'opzione sia write il messaggio contiene un ulteriore campo
+                    String new_line = message.split(":")[2];
+                    result = this.writeFileLine(path, new_line);
                 break;
                 default:
                     System.out.println("Operazione non valida");
@@ -146,7 +149,7 @@ public class TournamentServer {
                 //scrittura file in append tramite buffer writer
                 FileWriter fw = new FileWriter(file_path, true);
                 BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(new_line);
+                bw.write(new_line + "\n");
                 bw.close();
                 //Messaggio successo
                 result = "Riga aggiunta con successo";
