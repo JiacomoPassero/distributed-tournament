@@ -1,10 +1,7 @@
 package Tournament;
-import java.io.*;
-import java.net.*;
 
-/*Metodi richiesti: create/delete, Open/close, Read,write ed eventualmente lock */
-public class TournamentNode {
-
+/*Metodi richiesti: create/delete, Read,write ed eventualmente lock */
+public class TournamentNode{
     private String client_test;
 
     private TournamentServer ts;
@@ -12,7 +9,7 @@ public class TournamentNode {
 
 
     //costruttore
-    public TournamentNode(String ip_address, int port, String client_test, String local_path){
+    public TournamentNode (String ip_address, int port, String client_test, String local_path){
 
         ts = new TournamentServer(ip_address, port, local_path);
         tc = new TournamentClient(client_test);
@@ -65,9 +62,8 @@ public class TournamentNode {
         return result;
     }
 
-
     /*Metodo per agire come server TODO: renderlo più di un one shot approach*/
-    public void serverFileOperation(){
-        ts.serverFileOperation();
+    public void startNodeServer(){
+        ts.serverStart();
     }
 }

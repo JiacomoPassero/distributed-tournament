@@ -24,24 +24,63 @@ public class TournamentServer {
         this.local_path = local_path;
     }
 
-     /*Metodo per agire come server per la creazione di un file */
-    public void serverFileOperation(){
-        try {
-            //Creazione socket
-            ServerSocket ss;
-            Socket clientSocket;
+    //metodo per avviare il server in modo che resti in attesa di una richiesta, la esegua e passi ad attendere la successiva:
+    public void serverStart(){
+        //variabile per mantenere il server in esecuzione
+        boolean terminate = true;
+        String message, result;
+        //Socket per la connessione
+        ServerSocket ss;
+        Socket clientSocket;
+        //Stream per connessione
+        ObjectInputStream ois;
+        ObjectOutputStream oos;
 
-            //stabilire connessione
+        //ciclo di attività del server
+        try{
             ss = new ServerSocket(this.port);
-            System.out.println("Attesa richiesta creazione file...");
-            clientSocket = ss.accept();
+            while(terminate){
+                //apertura del server socket
+                
+                //tentativo stabilire connessione
+                System.out.println("Attesa richiesta creazione file...");
+                clientSocket = ss.accept();
 
+                //estrazione del messaggio
+                ois = new ObjectInputStream(clientSocket.getInputStream());
+                message = (String)ois.readObject();
+
+                //soddisfazione richiesta
+                result = this.serverFileOperation(message);
+
+                //invio risposta col risultato o il messaggio di errore
+                oos = new ObjectOutputStream(clientSocket.getOutputStream());
+                oos.writeObject(result);
+                oos.flush();
+                System.out.println("Operazione completata");
+
+                //chiudo il client socket
+                clientSocket.close();
+                
+            }
+            //terminata l'esecuzione chiudo il server socket
+            ss.close();
+        }catch(IOException e){
+            e.printStackTrace();
+            System.out.println("Errore nell'avvio del server");
+        }catch(ClassNotFoundException e){
+            e.printStackTrace();
+            System.out.println("Errore nella lettura del messaggio");
+        }
+    }
+
+    /*Metodo per agire come server per la creazione di un file */
+    public String serverFileOperation(String message){
+        String result="";
+        try {
             //parsing messaggio
-            ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-            String message = (String)ois.readObject();
             String operation = message.split(":")[0];
-            String path = message.split(":")[1];
-            String result="";
+            String path = message.split(":")[1];            
 
             switch (operation) {
                 case "create":
@@ -66,21 +105,10 @@ public class TournamentServer {
                     System.out.println("Operazione non valida");
                     break;
             }
-            
-            //invio messaggio risultato
-            ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
-            oos.writeObject(result);
-            oos.flush();
-            System.out.println("Operazione completata");
-
-            // chiusura socket
-            clientSocket.close();
-            ss.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        return result;
     }
 
     //creazione file locale

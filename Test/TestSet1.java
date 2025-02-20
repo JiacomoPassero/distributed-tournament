@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
 
@@ -23,22 +24,14 @@ public class TestSet1{
         TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
 
-        Thread serverCreateThread = new Thread(() -> {
-            serverNode.serverFileOperation();
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            serverNode.startNodeServer();
         });
-        Thread clientCreateThread = new Thread(() -> {
-            clientNode.clientFileOperation("file.txt","create");
-        });
-        //Test Creazione file remota
-        try {
-            serverCreateThread.start();
-            clientCreateThread.start();
 
-            serverCreateThread.join();
-            clientCreateThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        //creazione file
+        clientNode.clientFileOperation("file.txt","create");
+        
         //verifica creazione file
         File file = new File("Node1/file.txt");
         assertTrue(file.exists());
@@ -50,30 +43,21 @@ public class TestSet1{
         TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
 
-        File file = new File("Node1/file.txt");
-        try{
-            file.createNewFile();
-        }catch(Exception e){
-            e.printStackTrace();
-            fail();
-        }
-        //Cancellazione file
-        Thread serverDeleteThread = new Thread(() -> {
-            serverNode.serverFileOperation();
-        });
-        Thread clientDeleteThread = new Thread(() -> {
-            clientNode.clientFileOperation("file.txt","delete");
-        });
-        try {
-            serverDeleteThread.start();
-            clientDeleteThread.start();
 
-            serverDeleteThread.join();
-            clientDeleteThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            serverNode.startNodeServer();
+        });
         
+        //creazione file
+        clientNode.clientFileOperation("file.txt","create");
+        //verifica creazione file
+
+        File file = new File("Node1/file.txt");
+        assertTrue(file.exists());
+        //cancellazione file
+        clientNode.clientFileOperation("file.txt","delete");
+        //verifica cancellazione file
         assertFalse(file.exists());
     }
 
@@ -84,30 +68,16 @@ public class TestSet1{
         String testString = "linea di test";
 
         //Creazione del file per il test
-        File file = new File("Node1/file.txt");
-        try{
-            file.createNewFile();
-        }catch(Exception e){
-            e.printStackTrace();
-            fail();
-        }
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            serverNode.startNodeServer();
+        });
+        clientNode.clientFileOperation("file.txt","create");
+        
         //Scrittura file
-        Thread serverWriteThread = new Thread(() -> {
-            serverNode.serverFileOperation();
-        });
-        Thread clientWriteThread = new Thread(() -> {
-            clientNode.clientFileOperation("file.txt","write",testString);
-        });
-        //Creazione file remota 
-        try {
-            serverWriteThread.start();
-            clientWriteThread.start();
-
-            serverWriteThread.join();
-            clientWriteThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        clientNode.clientFileOperation("file.txt","write",testString);
+       
+        File file = new File("Node1/file.txt");
         //verifica che il file contenga la riga scritta 
         boolean check = false;
         try{
@@ -125,39 +95,29 @@ public class TestSet1{
     }
 
     @Test
-    public void testReadAppend(){
+    public void testRead(){
         TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
         String testString = "linea di test";
         String lettura="";
 
+        //Creazione del file per il test
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            serverNode.startNodeServer();
+        });
+        //creaione file
+        clientNode.clientFileOperation("file.txt","create");
+        //Scrittura file
+        clientNode.clientFileOperation("file.txt","write",testString);
+
         //Creazione del file e aggiunta della riga da leggere
         File file = new File("Node1/file.txt");
-        try{
-            file.createNewFile();
-            FileWriter fw = new FileWriter("Node1/file.txt", true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(testString + "\n");
-                bw.close();
-        }catch(Exception e){
-            e.printStackTrace();
-            fail();
-        }
-        //Lettura remota del fule file
-        Thread serverReadThread = new Thread(() -> {
-            serverNode.serverFileOperation();
-        });
-        //Creazione file remota 
-        try {
-            serverReadThread.start();
-            lettura = clientNode.clientFileReadline("file.txt","read",0);
-
-            serverReadThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //chiusura file e assert
-        file.delete();
+        //lettura
+        lettura = clientNode.clientFileReadline("file.txt","read",0);
+    
+        //cancellazione e controllo
+        clientNode.clientFileOperation("file.txt","delete");
         assertEquals(lettura,testString);
     }
 
@@ -168,32 +128,19 @@ public class TestSet1{
         String testString = "linea di test";
         String lettura="";
 
-        //Creazione del file e aggiunta della riga da leggere
-        File file = new File("Node1/file.txt");
-        try{
-            file.createNewFile();
-            FileWriter fw = new FileWriter("Node1/file.txt", true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(testString + "\n");
-                bw.close();
-        }catch(Exception e){
-            e.printStackTrace();
-            fail();
-        }
-        //Lettura remota del fule file
-        Thread serverReadThread = new Thread(() -> {
-            serverNode.serverFileOperation();
+        //Creazione del file per il test
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            serverNode.startNodeServer();
         });
-        //Creazione file remota 
-        try {
-            serverReadThread.start();
-            lettura = clientNode.clientFileReadline("file.txt","read",0);
+        //creaione file
+        clientNode.clientFileOperation("file.txt","create");
+        File file = new File("Node1/file.txt");
+        //Scrittura file
+        clientNode.clientFileOperation("file.txt","write",testString);
 
-            serverReadThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //chiusura file e assert
+        //clettoura offset erroneo
+        lettura = clientNode.clientFileReadline("file.txt","read",10);
         //La lettura dovrebbe dare errore di offset non valido
         file.delete();
         assertNotEquals(lettura,"offset non valido");
