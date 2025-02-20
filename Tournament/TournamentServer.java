@@ -101,6 +101,10 @@ public class TournamentServer {
                     int offset = Integer.parseInt(message.split(":")[2]);
                     result = this.readFileLine(path, offset);
                 break;
+                case "exist":
+                    //controlla se il file esiste localmente
+                    result += this.existLocalFile(path);
+                break;
                 default:
                     System.out.println("Operazione non valida");
                     break;
@@ -209,5 +213,12 @@ public class TournamentServer {
             result = "Errore nella scrittura del file";
         }
         return result;
+    }
+
+    //controlla se un file locale passato esiste
+    public boolean existLocalFile(String file_path){
+        file_path = this.local_path + file_path;
+        File file = new File(file_path);
+        return file.exists();
     }
 }

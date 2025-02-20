@@ -7,12 +7,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
@@ -111,11 +109,9 @@ public class TestSet1{
         //Scrittura file
         clientNode.clientFileOperation("file.txt","write",testString);
 
-        //Creazione del file e aggiunta della riga da leggere
-        File file = new File("Node1/file.txt");
         //lettura
         lettura = clientNode.clientFileReadline("file.txt","read",0);
-    
+
         //cancellazione e controllo
         clientNode.clientFileOperation("file.txt","delete");
         assertEquals(lettura,testString);
@@ -144,6 +140,26 @@ public class TestSet1{
         //La lettura dovrebbe dare errore di offset non valido
         file.delete();
         assertNotEquals(lettura,"offset non valido");
+    }
+
+    @Test
+    public void checkExistenceLocalFile(){
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+
+        File file;
+        try{
+            file = new File("Node2/file.txt");
+            file.createNewFile();
+
+            String locate_result = clientNode.locate("file.txt");
+            assertEquals(locate_result,"local");
+
+            file.delete();
+        }catch(IOException e){
+            e.printStackTrace();
+            fail(null);
+        }
+        
     }
     
 }
