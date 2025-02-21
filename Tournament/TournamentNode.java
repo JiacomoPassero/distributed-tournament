@@ -5,19 +5,22 @@ import java.util.HashMap;
 /*Metodi richiesti: create/delete, Read,write ed eventualmente lock */
 public class TournamentNode{
 
-
     private TournamentServer ts;
     private TournamentClient tc;
-    private HashMap<String,TournamentNeighbor> tn;
-
+    protected HashMap<String,TournamentNeighbor> tn;
 
     //costruttore
-    public TournamentNode (String ip_address, int port, String local_path){
-        ts = new TournamentServer(ip_address, port, local_path);
-        tc = new TournamentClient();
+    public TournamentNode (String name, String ip_address, int port, String local_path){
         tn = new HashMap<String,TournamentNeighbor>();
+        ts = new TournamentServer(name, ip_address, port, local_path, this.tn);
+        tc = new TournamentClient();
         //valore di test in attesa di implementazione metodo locate
-    }  
+    }
+
+    /*Metodo per agire come server */
+    public void startNodeServer(){
+        ts.serverStart();
+    }
 
     /*Metodo per rintraggiare un file tra i vari nodi 
      * 1 - controllo se il file esiste localmente
@@ -141,8 +144,34 @@ public class TournamentNode{
         return this.tc.sendRequest(message, s_addres, s_port);
     }
 
-    /*Metodo per agire come server */
-    public void startNodeServer(){
-        ts.serverStart();
+    //Metodo inserire il nodo in una rete, invia una richiesta ad un vicino che conosce
+    //vengono trasferiti tutti i vicini nel nodo richiedente 
+    //TODO: si invia una richiesta ad ogni nuovo nodo vicino per richiedere di essere aggiunti 
+    public String tournamentJoin(){
+        String result = "";
+
+        if(this.tn.isEmpty()){
+            return "Nessun vicino a cui chiedere l'ingresso";
+        }
+        //se c'è almeno un vicino lo estraggo per richiedere l'invio della lista dei suoi vicini
+        //estraggo la prima chiave, essendo su un grafo completo non importa quale
+        String join_point = this.tn.keySet().iterator().next();
+
+        //costruzione messaggio richiesta
+        String s_addres = this.tn.get(join_point).getAddress();
+        int s_port = this.tn.get(join_point).getPort();
+        //il messaggio contine un parametro in più
+        String message = "join_request"+":"+this.ts.getName()+":"+this.ts.getAddress()+":"+this.ts.getPort();
+
+        result = this.tc.sendRequest(message, s_addres, s_port);
+        
+        //il nome del nodo deve essere unico nella rete
+        if(result == "nome esistente")
+            return "Operazione fallita: "+result;
+        
+        //se il nome è univoco ho ricevuto la lista degli ID
+        return result;
     }
+
+
 }

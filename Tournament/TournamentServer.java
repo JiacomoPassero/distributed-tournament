@@ -11,17 +11,22 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 public class TournamentServer {
+    private String name;
     private String ip_address;
     private int port;
     private String local_path;
+    protected HashMap<String,TournamentNeighbor> tn;
 
-    public TournamentServer(String ip_address, int port, String local_path){
+    public TournamentServer(String name, String ip_address, int port, String local_path, HashMap<String,TournamentNeighbor> tn){
+        this.name = name;
         this.ip_address = ip_address;
         this.port = port;
         this.local_path = local_path;
+        this.tn = tn;
     }
 
     //metodo per avviare il server in modo che resti in attesa di una richiesta, la esegua e passi ad attendere la successiva:
@@ -101,6 +106,12 @@ public class TournamentServer {
                 case "exist":
                     //controlla se il file esiste localmente
                     result += this.existLocalFile(path);
+                break;
+                case "join_request":
+                    //in questo caso il path è il NOME del nuovo nodo.
+                    String request_address = message.split(":")[2];
+                    int  request_port = Integer.parseInt(message.split(":")[3]);
+                    result = this.insertNewNode(path, request_address, request_port);
                 break;
                 default:
                     System.out.println("Operazione non valida");
@@ -218,5 +229,54 @@ public class TournamentServer {
         file_path = this.local_path + file_path;
         File file = new File(file_path);
         return file.exists();
+    }
+
+    private String insertNewNode(String new_node, String new_address, int new_port){
+        //controllo che il nome del nodo non sia dublicato
+        if(tn.containsKey(new_node)){
+            return "nome esistente";
+        }
+
+        //per ogni vicino mi serve sapere il nome, l'indirizzo e la porta
+        String lista_vicini= "";
+        //il separatore tra più nodi è dato da ::
+        //inserisco tutti i vicini
+        for(String key : tn.keySet()){
+            if(!lista_vicini.isEmpty()){
+                lista_vicini+="::";
+            }
+            lista_vicini+=key+":"+tn.get(key).getAddress()+":"+tn.get(key).getPort();
+            
+        }
+
+        //prima di inviare il risultato inserisco il vicino attuale
+        TournamentNeighbor new_n = new TournamentNeighbor(new_address, new_port);
+        tn.put(new_node, new_n);
+
+        return lista_vicini;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return ip_address;
+    }
+
+    public void setAddress(String ip_address) {
+        this.ip_address = ip_address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }
