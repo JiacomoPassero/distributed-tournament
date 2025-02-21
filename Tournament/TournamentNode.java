@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 /*Metodi richiesti: create/delete, Read,write ed eventualmente lock */
 public class TournamentNode{
-    private String client_test;
+
 
     private TournamentServer ts;
     private TournamentClient tc;
@@ -12,12 +12,11 @@ public class TournamentNode{
 
 
     //costruttore
-    public TournamentNode (String ip_address, int port, String client_test, String local_path){
+    public TournamentNode (String ip_address, int port, String local_path){
         ts = new TournamentServer(ip_address, port, local_path);
-        tc = new TournamentClient(client_test);
+        tc = new TournamentClient();
         tn = new HashMap<String,TournamentNeighbor>();
         //valore di test in attesa di implementazione metodo locate
-        this.client_test = client_test;
     }  
 
     /*Metodo per rintraggiare un file tra i vari nodi 

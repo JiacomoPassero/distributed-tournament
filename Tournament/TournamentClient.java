@@ -6,10 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class TournamentClient {
-    //private String client_test;
 
-    public TournamentClient(String client_test){
-        //this.client_test = client_test;
+    public TournamentClient(){
+
     }
 
     public String sendRequest(String message, String s_address, int s_port){
@@ -35,7 +34,7 @@ public class TournamentClient {
         }
         return result;
     }
-    
+
     public boolean clientFileSearch(String path, String s_address, int s_port){ 
         //nel caso avvenga un errore di default il file non viene trovato
         String result = "" + false;

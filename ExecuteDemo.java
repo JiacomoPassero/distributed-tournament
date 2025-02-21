@@ -8,8 +8,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class ExecuteDemo {
     public static void main(String[] args) {
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
 
         clientNode.addNeighbor("Node1", "localhost", 3000);
 

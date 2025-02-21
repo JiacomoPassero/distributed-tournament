@@ -19,7 +19,7 @@ public class TestSet1{
 
     @Test
     public void testFileCreateLocale(){
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3001", "Node2/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
 
         //creazione file locale
         clientNode.createFile("file.txt","local");
@@ -32,8 +32,8 @@ public class TestSet1{
 
     @Test
     public void testFileCreateRemoto(){
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
 
         clientNode.addNeighbor("Node1", "localhost", 3000);
 
@@ -53,7 +53,7 @@ public class TestSet1{
 
     @Test
     public void testDeleteLocale(){
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3001", "Node2/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
 
         //creazione file locale
         clientNode.createFile("file.txt","local");
@@ -65,8 +65,8 @@ public class TestSet1{
 
     @Test
     public void testDeleteRemoto(){
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
 
         clientNode.addNeighbor("Node1", "localhost", 3000);
 
@@ -86,7 +86,7 @@ public class TestSet1{
 
     @Test
     public void testReadWriteAppendLocale(){
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
         
         String testString = "linea di test";
         //creazione file locale
@@ -106,8 +106,8 @@ public class TestSet1{
 
     @Test
     public void testReadWriteAppendRemoto(){
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "Node2/");
 
         clientNode.addNeighbor("Node1", "localhost", 3000);
 
