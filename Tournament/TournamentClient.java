@@ -12,38 +12,9 @@ public class TournamentClient {
         //this.client_test = client_test;
     }
 
-    /*Metodo per agire come client per la creazione di un file */
-    public void clientFileOperation(String path, String operation, String s_address, int s_port){ 
-        try {
-            String message = operation + ":" + path;
-
-            //apertura socket server
-            Socket s = new Socket(s_address, s_port);
-            ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-
-            //invio messaggio
-            oos.writeObject(message);
-            oos.flush();
-
-            //ricezione risposta e output risultato
-            ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-            String result = (String)ois.readObject();
-            System.out.println("Risultato operazione: " + result);
-
-            s.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String clientFileReadline(String path, String operation, int offset,String s_address, int s_port){ 
+    public String sendRequest(String message, String s_address, int s_port){
         String result = "";
         try {
-            //composizione messaggio
-            String message = operation + ":" + path + ":" + offset;
-
             //apertura socket server
             Socket s = new Socket(s_address, s_port);
             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
@@ -54,20 +25,17 @@ public class TournamentClient {
 
             //ricezione risposta e output risultato
             ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-             
             result = (String)ois.readObject();
-            System.out.println("Risultato operazione: " + result);
-
+            //chiusura socket
             s.close();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
         return result;
     }
-
+    
     public boolean clientFileSearch(String path, String s_address, int s_port){ 
         //nel caso avvenga un errore di default il file non viene trovato
         String result = "" + false;

@@ -18,148 +18,118 @@ import org.junit.Test;
 public class TestSet1{
 
     @Test
-    public void testFileCreate(){
+    public void testFileCreateLocale(){
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3001", "Node2/");
+
+        //creazione file locale
+        clientNode.createFile("file.txt","local");
+        
+        //verifica creazione file locale
+        File file = new File("Node2/file.txt");
+        assertTrue(file.exists());
+        file.delete();
+    }
+
+    @Test
+    public void testFileCreateRemoto(){
         TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
 
+        clientNode.addNeighbor("Node1", "localhost", 3000);
+
+        //start server
         CompletableFuture.runAsync(() -> { 
             // Handle the request 
             serverNode.startNodeServer();
         });
-
-        //creazione file
-        clientNode.clientFileOperation("file.txt","create");
+        //creazione file remoto
+        System.out.println(clientNode.createFile("file.txt","Node1"));
         
-        //verifica creazione file
+        //verifica creazione file remoto
         File file = new File("Node1/file.txt");
         assertTrue(file.exists());
         file.delete();
     }
 
     @Test
-    public void testDeleteCreate(){
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+    public void testDeleteLocale(){
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3001", "Node2/");
 
-
-        CompletableFuture.runAsync(() -> { 
-            // Handle the request 
-            serverNode.startNodeServer();
-        });
-        
-        //creazione file
-        clientNode.clientFileOperation("file.txt","create");
-        //verifica creazione file
-
-        File file = new File("Node1/file.txt");
-        assertTrue(file.exists());
-        //cancellazione file
-        clientNode.clientFileOperation("file.txt","delete");
-        //verifica cancellazione file
+        //creazione file locale
+        clientNode.createFile("file.txt","local");
+        clientNode.deleteFile("file.txt");
+        //verifica creazione file locale
+        File file = new File("Node2/file.txt");
         assertFalse(file.exists());
     }
 
     @Test
-    public void testWriteAppend(){
+    public void testDeleteRemoto(){
         TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
         TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
-        String testString = "linea di test";
 
-        //Creazione del file per il test
+        clientNode.addNeighbor("Node1", "localhost", 3000);
+
+        //start server
         CompletableFuture.runAsync(() -> { 
             // Handle the request 
             serverNode.startNodeServer();
         });
-        clientNode.clientFileOperation("file.txt","create");
+        //creazione file remoto
+        clientNode.createFile("file.txt","Node1");
+
+        //cancellazione e verifica remoto
+        clientNode.deleteFile("file.txt");
+        File file = new File("Node2/file.txt");
+        assertFalse(file.exists());
+    }
+
+    @Test
+    public void testReadWriteAppendLocale(){
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
         
-        //Scrittura file
-        clientNode.clientFileOperation("file.txt","write",testString);
-       
-        File file = new File("Node1/file.txt");
-        //verifica che il file contenga la riga scritta 
-        boolean check = false;
-        try{
-            BufferedReader bf = new BufferedReader(new FileReader("Node1/file.txt"));
-            String line = bf.readLine();
-
-            check = line.equals(testString);
-            bf.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
-        file.delete();
-        assertTrue(check);
-    }
-
-    @Test
-    public void testRead(){
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
         String testString = "linea di test";
-        String lettura="";
-
-        //Creazione del file per il test
-        CompletableFuture.runAsync(() -> { 
-            // Handle the request 
-            serverNode.startNodeServer();
-        });
-        //creaione file
-        clientNode.clientFileOperation("file.txt","create");
-        //Scrittura file
-        clientNode.clientFileOperation("file.txt","write",testString);
-
-        //lettura
-        lettura = clientNode.clientFileReadline("file.txt","read",0);
-
-        //cancellazione e controllo
-        clientNode.clientFileOperation("file.txt","delete");
-        assertEquals(lettura,testString);
-    }
-
-    @Test
-    public void testReadAppendFails(){
-        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
-        String testString = "linea di test";
-        String lettura="";
-
-        //Creazione del file per il test
-        CompletableFuture.runAsync(() -> { 
-            // Handle the request 
-            serverNode.startNodeServer();
-        });
-        //creaione file
-        clientNode.clientFileOperation("file.txt","create");
-        File file = new File("Node1/file.txt");
-        //Scrittura file
-        clientNode.clientFileOperation("file.txt","write",testString);
-
-        //clettoura offset erroneo
-        lettura = clientNode.clientFileReadline("file.txt","read",10);
-        //La lettura dovrebbe dare errore di offset non valido
-        file.delete();
-        assertNotEquals(lettura,"offset non valido");
-    }
-
-    @Test
-    public void checkExistenceLocalFile(){
-        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
-
-        File file;
-        try{
-            file = new File("Node2/file.txt");
-            file.createNewFile();
-
-            String locate_result = clientNode.locate("file.txt");
-            assertEquals(locate_result,"local");
-
-            file.delete();
-        }catch(IOException e){
-            e.printStackTrace();
-            fail(null);
-        }
+        //creazione file locale
+        clientNode.createFile("file.txt","local");
+        //scrittura
+        clientNode.writeFile("file.txt",testString);
         
+        //lettura linea inesistente e scritta
+        String lettura_erronea = clientNode.readFile("file.txt", 100);
+        String lettura = clientNode.readFile("file.txt",0);
+
+        //cancellazione file e verifica
+        clientNode.deleteFile("file.txt");
+        assertEquals(testString, lettura);
+        assertEquals(lettura_erronea, "Offset non valido");
     }
-    
+
+    @Test
+    public void testReadWriteAppendRemoto(){
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
+
+        clientNode.addNeighbor("Node1", "localhost", 3000);
+
+        //start server
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            serverNode.startNodeServer();
+        });
+        
+        String testString = "linea di test";
+        //creazione file locale
+        clientNode.createFile("file.txt","Node1");
+        //scrittura
+        clientNode.writeFile("file.txt",testString);
+        
+        //lettura linea inesistente e scritta
+        String lettura_erronea = clientNode.readFile("file.txt", 100);
+        String lettura = clientNode.readFile("file.txt",0);
+
+        //cancellazione file e verifica
+        clientNode.deleteFile("file.txt");
+        assertEquals(testString, lettura);
+        assertEquals(lettura_erronea, "Offset non valido");
+    }    
 }

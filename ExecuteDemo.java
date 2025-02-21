@@ -1,44 +1,33 @@
 import Tournament.TournamentNode;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture; 
 
 public class ExecuteDemo {
     public static void main(String[] args) {
-        //creo una lista di nodi
-        TournamentNode clientNode = new TournamentNode("localhost", 3005, "localhost:3000", "Node5/");
-        ArrayList<TournamentNode> nodes = new ArrayList<TournamentNode>();
+        TournamentNode serverNode = new TournamentNode("localhost", 3000, "localhost:3001", "Node1/");
+        TournamentNode clientNode = new TournamentNode("localhost", 3001, "localhost:3000", "Node2/");
 
-        for(int i = 0 ; i < 5; i++){
-            nodes.add(new TournamentNode("localhost", 3000+i, "localhost:3000", "Node" + i + "/"));
-        }
+        clientNode.addNeighbor("Node1", "localhost", 3000);
 
-        //Collego il client ai nodi
-        for(int i = 0 ; i < 5; i++){
-            clientNode.addNeighbor("Node" + i, "localhost", 3000+i);
-        }
-        //Avvio i server dei nodi
-        for(int i = 0 ; i < 5; i++){
-            int ii = i;
-            CompletableFuture.runAsync(() -> { 
-                nodes.get(ii).startNodeServer();
-            });
-        }
-
-        //test creazione file
-        for(int i = 0 ; i < 5; i++){
-            clientNode.clientFileOperation("file"+i+".txt", "create");
-        }
-
-/*         CompletableFuture.runAsync(() -> { 
+        //start server
+        CompletableFuture.runAsync(() -> { 
             // Handle the request 
             serverNode.startNodeServer();
         });
-
-        //creazione file
-        clientNode.clientFileOperation("file.txt","create");
-        //eliminazione file
-        clientNode.clientFileOperation("file.txt","delete"); */
-
+        
+        String testString = "linea di test";
+        //creazione file locale
+        clientNode.createFile("file.txt","Node1");
+        //scrittura
+        clientNode.writeFile("file.txt",testString);
+        
+        System.out.println("--------------"+clientNode.readFile("file.txt", 100)); 
+        System.out.println("--------------"+clientNode.readFile("file.txt", 0)); 
+        //cancellazione file e verifica
+        //clientNode.deleteFile("file.txt");
     }    
 }

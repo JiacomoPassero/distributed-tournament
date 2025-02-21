@@ -36,7 +36,7 @@ public class TournamentNode{
 
                 if(tc.clientFileSearch(file, tn.get(key).getAddress(), tn.get(key).getPort())){
                     //System.out.println("File trovato in: " + tn.get(key).getAddress() + ":" + tn.get(key).getPort());
-                    return tn.get(key).getAddress() + ":" + tn.get(key).getPort();
+                    return key;
                 }
                 
 
@@ -56,55 +56,90 @@ public class TournamentNode{
         tn.remove(name);
     }
 
-    /*Metodo per agire come client per la creazione di un file */
-    public void clientFileOperation(String path, String operation){ 
-        //locate file
-        String location = this.locate(path);
-        if(location.equals("not found")){
-            System.out.println("File non trovato");
-            return;
+    //Metodo per la creazione di un file, è necessario specificare su quale nodo si desidera salvare il file
+    public String createFile(String path, String location){
+        //controllo se il nodo è presente localmente
+        if(location.equals("local")){
+            //sfrutto le operazioni del server che gestisce anche il path relativo
+            return ts.createFile(path);
         }
-        //parsing location
-        String s_address = location.split(":")[0];
-        int s_port = Integer.parseInt(location.split(":")[1]);
+        //se la creazione non è locale l'indirizzo e la porta del server del nodo vengono presi dalla lista dei vicini
+        //prima controllo esistenza del nodo
+        if(!this.tn.containsKey(location)){
+            return "Nodo non presente";
+        }
 
-        tc.clientFileOperation(path, operation, s_address, s_port);
+        String s_addres = this.tn.get(location).getAddress();
+        int s_port = this.tn.get(location).getPort();
+        String message = "create"+":"+path;
+
+        return this.tc.sendRequest(message, s_addres, s_port);
     }
 
-    //overloding del metodo da invocare in caso di write che a si che venga aggiunto un parametro in più alla stringa da inviare
-    public void clientFileOperation(String path, String operation, String new_line){ 
-        //locate file
+     //Metodo per la cancellazione di un file di un file, è necessario specificare su quale nodo si desidera salvare il file
+     public String deleteFile(String path){
+        //locate del nodo
         String location = this.locate(path);
+        //se il nodo non è presente lo segnalo
         if(location.equals("not found")){
-            System.out.println("File non trovato");
-            return;
+            return location;
         }
-        //parsing location
-        String s_address = location.split(":")[0];
-        int s_port = Integer.parseInt(location.split(":")[1]);
 
-        //aggiungo la nuova linea da scrivere nel file in modo che finisca in coda al comando
-        path = path + ":" + new_line;
+        //se localce cancello tramite ts
+        if(location.equals("local")){
+            return ts.deleteFile(path);
+        }
 
-        tc.clientFileOperation(path, operation, s_address, s_port);
+        //il nodo è presente in un altro nodo del sistema
+        String s_addres = this.tn.get(location).getAddress();
+        int s_port = this.tn.get(location).getPort();
+        String message = "delete"+":"+path;
+
+        return this.tc.sendRequest(message, s_addres, s_port);
     }
 
-    //versione del metodo per invocare una read che deve quindi restituire un valore letto
-    public String clientFileReadline(String path, String operation, int offset){ 
-        //locate file
+    public String writeFile(String path, String new_line){
+        //locate del nodo
         String location = this.locate(path);
+        //se il nodo non è presente lo segnalo
         if(location.equals("not found")){
-            System.out.println("File non trovato");
-            return "";
+            return location;
         }
-        //parsing location
-        String s_address = location.split(":")[0];
-        int s_port = Integer.parseInt(location.split(":")[1]);
-        String result;
 
-        result = tc.clientFileReadline(path, operation, offset, s_address, s_port);
+        //se localce cancello tramite ts
+        if(location.equals("local")){
+            return ts.writeFileLine(path, new_line);
+        }
 
-        return result;
+        //il nodo è presente in un altro nodo del sistema
+        String s_addres = this.tn.get(location).getAddress();
+        int s_port = this.tn.get(location).getPort();
+        //il messaggio contine un parametro in più
+        String message = "write"+":"+path+":"+new_line;
+
+        return this.tc.sendRequest(message, s_addres, s_port);
+    } 
+
+    public String readFile(String path, int line){
+        //locate del nodo
+        String location = this.locate(path);
+        //se il nodo non è presente lo segnalo
+        if(location.equals("not found")){
+            return location;
+        }
+
+        //se localce cancello tramite ts
+        if(location.equals("local")){
+            return ts.readFileLine(path, line);
+        }
+
+        //il nodo è presente in un altro nodo del sistema
+        String s_addres = this.tn.get(location).getAddress();
+        int s_port = this.tn.get(location).getPort();
+        //il messaggio contine un parametro in più
+        String message = "read"+":"+path+":"+line;
+
+        return this.tc.sendRequest(message, s_addres, s_port);
     }
 
     /*Metodo per agire come server */

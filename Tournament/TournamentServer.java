@@ -38,12 +38,11 @@ public class TournamentServer {
 
         //ciclo di attività del server
         try{
+            //apertura server socket
             ss = new ServerSocket(this.port);
-            while(terminate){
-                //apertura del server socket
-                
+            while(terminate){                
                 //tentativo stabilire connessione
-                System.out.println("Attesa richiesta creazione file...");
+                System.out.println("Attesa richiesta...");
                 clientSocket = ss.accept();
 
                 //estrazione del messaggio
@@ -57,11 +56,9 @@ public class TournamentServer {
                 oos = new ObjectOutputStream(clientSocket.getOutputStream());
                 oos.writeObject(result);
                 oos.flush();
-                System.out.println("Operazione completata");
 
                 //chiudo il client socket
-                clientSocket.close();
-                
+                clientSocket.close();           
             }
             //terminata l'esecuzione chiudo il server socket
             ss.close();
@@ -84,7 +81,7 @@ public class TournamentServer {
 
             switch (operation) {
                 case "create":
-                    System.out.print("Richiesta creazione file: " + path);
+                    System.out.println("Richiesta creazione file: " + path);
                     result = this.createFile(path);
                     break;
                 case "delete":
@@ -116,7 +113,7 @@ public class TournamentServer {
     }
 
     //creazione file locale
-    private String createFile(String file_path) {
+    protected String createFile(String file_path) {
         //creazione file
         String result = "";
         file_path = this.local_path + file_path;
@@ -135,7 +132,7 @@ public class TournamentServer {
     }
 
     //cancellazione file locale
-    private String deleteFile(String file_path){
+    protected String deleteFile(String file_path){
         file_path = this.local_path + file_path;
         String result = "";
             try{
@@ -156,7 +153,7 @@ public class TournamentServer {
         return result;
     }
     //lettura riga da un file locale
-    private String readFileLine(String file_path, int offset){
+    protected String readFileLine(String file_path, int offset){
         String result = "";
         file_path = this.local_path + file_path;
         try{
@@ -179,6 +176,7 @@ public class TournamentServer {
                 }
                 //Assegnazioe riga desiderata
                 result = br.readLine();
+                br.close();
             }else{
                 //il file non esiste
                 result = "File non esistente";
@@ -191,7 +189,7 @@ public class TournamentServer {
     }
 
     //scrittura riga da un file locale
-    private String writeFileLine(String file_path, String new_line){
+    protected String writeFileLine(String file_path, String new_line){
         String result = "";
         file_path = this.local_path + file_path;
         try{
