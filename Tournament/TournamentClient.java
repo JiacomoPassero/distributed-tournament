@@ -54,7 +54,6 @@ public class TournamentClient {
             ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
              
             result = (String)ois.readObject();
-            System.out.println("Risultato ricerca: " + result);
 
             s.close();
         } catch (IOException e) {

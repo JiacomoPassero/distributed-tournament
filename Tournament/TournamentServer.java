@@ -47,7 +47,7 @@ public class TournamentServer {
             ss = new ServerSocket(this.port);
             while(terminate){                
                 //tentativo stabilire connessione
-                System.out.println("Attesa richiesta...");
+                //System.out.println("Attesa richiesta...");
                 clientSocket = ss.accept();
 
                 //estrazione del messaggio
@@ -112,6 +112,9 @@ public class TournamentServer {
                     String request_address = message.split(":")[2];
                     int  request_port = Integer.parseInt(message.split(":")[3]);
                     result = this.insertNewNode(path, request_address, request_port);
+                break;
+                case "add_me":
+                    result = this.addNeighbor(message);
                 break;
                 default:
                     System.out.println("Operazione non valida");
@@ -254,6 +257,22 @@ public class TournamentServer {
         tn.put(new_node, new_n);
 
         return lista_vicini;
+    }
+
+    //metodo per aggiungere un nuovo nodo alla lista dei vicini
+    public String addNeighbor(String message){
+        String new_name, new_address;
+        int new_port;
+        //skip di un indice poichè viene passato il messaggio non soggetto a parsing
+        new_name = message.split(":")[1];
+        new_address = message.split(":")[2];
+        new_port = Integer.parseInt(message.split(":")[3]);
+        //prima di inserire verifico l'esistenza del nome
+        if(tn.containsKey(new_name))
+            return "nodo esistente";
+
+        tn.put(new_name, new TournamentNeighbor(new_address, new_port));
+        return "Vicino aggiunto";
     }
 
     public String getName() {

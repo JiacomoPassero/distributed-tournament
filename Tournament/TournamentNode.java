@@ -1,5 +1,4 @@
 package Tournament;
-
 import java.util.HashMap;
 
 /*Metodi richiesti: create/delete, Read,write ed eventualmente lock */
@@ -47,7 +46,7 @@ public class TournamentNode{
         return result;
     }
 
-    //aggiungere un vicino
+    //aggiungere un un vicino al nodo che invoca il metodo (non crea il link perchè manca dall'altra parte)
     public void addNeighbor(String name, String address, int port){
         TournamentNeighbor n = new TournamentNeighbor(address, port);
         tn.put(name, n);
@@ -146,7 +145,7 @@ public class TournamentNode{
 
     //Metodo inserire il nodo in una rete, invia una richiesta ad un vicino che conosce
     //vengono trasferiti tutti i vicini nel nodo richiedente 
-    //TODO: si invia una richiesta ad ogni nuovo nodo vicino per richiedere di essere aggiunti 
+    //Si invia una richiesta ad ogni nuovo nodo vicino per richiedere di essere aggiunti 
     public String tournamentJoin(){
         String result = "";
 
@@ -169,8 +168,42 @@ public class TournamentNode{
         if(result == "nome esistente")
             return "Operazione fallita: "+result;
         
-        //se il nome è univoco ho ricevuto la lista degli ID
-        return result;
+        //se il nome è univoco ho ricevuto la lista degli ID in formato stringa nel formato
+        //nome:indirizzo:porta::nome:indirizzo:porta....
+        //Trasformo la stringa in un array di stringhe
+        String[] nodes = result.split("::");
+
+        //inserisco i nuovi nodi
+        String new_name, new_address, message_add_me;
+        int new_port;
+        String nodi_non_inseriti="";
+        for(String node : nodes){
+            new_name = node.split(":")[0];
+            new_address = node.split(":")[1];
+            new_port = Integer.parseInt(node.split(":")[2]);
+            
+            this.tn.put(new_name, new TournamentNeighbor(new_address, new_port));
+            //Invio anche una richiesta di essere aggiunto come vicino
+            message_add_me = "add_me"+":"+this.ts.getName()+":"+this.ts.getAddress()+":"+this.ts.getPort();
+            //System.out.println();
+            result = this.tc.sendRequest(message_add_me, new_address, new_port);
+
+            if(result.equals("nodo esistente")){
+                if(!nodi_non_inseriti.isEmpty()){
+                     nodi_non_inseriti += "::";
+                }
+                nodi_non_inseriti += new_name;
+            }
+    
+        }
+
+        if(!nodi_non_inseriti.isEmpty())
+            return "Node join completato. Errore nell'inseriento dei seguenti nodi:" + nodi_non_inseriti;
+
+        else{
+            
+        }
+        return "Node join completato";
     }
 
     public void printNeighbors(){
