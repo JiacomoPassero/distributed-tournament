@@ -173,5 +173,10 @@ public class TournamentNode{
         return result;
     }
 
+    public void printNeighbors(){
+        for (String key : tn.keySet()) {
+            System.out.println(key+":"+ this.tn.get(key).getAddress()+":"+this.tn.get(key).getPort());
+        }
+    }
 
 }

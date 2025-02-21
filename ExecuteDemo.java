@@ -47,6 +47,7 @@ public class ExecuteDemo {
         //aggiungo un vicino ad node2
         node3.addNeighbor("Node0", "localhost", 3000);
         System.out.println(node3.tournamentJoin());
+        node0.printNeighbors();
        
     }    
 }
