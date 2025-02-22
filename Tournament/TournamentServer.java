@@ -20,6 +20,7 @@ public class TournamentServer {
     private int port;
     private String local_path;
     protected HashMap<String,TournamentNeighbor> tn;
+    private boolean active;
 
     public TournamentServer(String name, String ip_address, int port, String local_path, HashMap<String,TournamentNeighbor> tn){
         this.name = name;
@@ -32,7 +33,7 @@ public class TournamentServer {
     //metodo per avviare il server in modo che resti in attesa di una richiesta, la esegua e passi ad attendere la successiva:
     public void serverStart(){
         //variabile per mantenere il server in esecuzione
-        boolean terminate = true;
+        this.active = true;
         String message, result;
         //Socket per la connessione
         ServerSocket ss;
@@ -45,7 +46,7 @@ public class TournamentServer {
         try{
             //apertura server socket
             ss = new ServerSocket(this.port);
-            while(terminate){                
+            while(active){                
                 //tentativo stabilire connessione
                 //System.out.println("Attesa richiesta...");
                 clientSocket = ss.accept();
@@ -85,6 +86,10 @@ public class TournamentServer {
             String path = message.split(":")[1];            
 
             switch (operation) {
+                case "stop":
+                    System.out.println("Server Stop");
+                    this.active = false;
+                    break;
                 case "create":
                     System.out.println("Richiesta creazione file: " + path);
                     result = this.createFile(path);

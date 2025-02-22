@@ -21,6 +21,10 @@ public class TournamentNode{
         ts.serverStart();
     }
 
+    public void stopNodeServer(){
+        this.tc.sendRequest("stop:server", this.ts.getAddress(), this.ts.getPort());
+    }
+
     /*Metodo per rintraggiare un file tra i vari nodi 
      * 1 - controllo se il file esiste localmente
      * 2 - controllo se il file esiste in un nodo vicino
