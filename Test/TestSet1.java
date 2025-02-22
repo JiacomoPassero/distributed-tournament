@@ -126,5 +126,52 @@ public class TestSet1{
         clientNode.deleteFile("file.txt");
         assertEquals(testString, lettura);
         assertEquals(lettura_erronea, "Offset non valido");
-    }    
+    } 
+    
+    @Test
+    public void testNodeJoin(){
+        TournamentNode node4 = new TournamentNode("Node4","localhost", 3004, "Node4/");
+        TournamentNode node5 = new TournamentNode("Node5","localhost", 3005, "Node5/");
+
+        node5.addNeighbor("Node4", "localhost", 3004);
+
+        //start node4
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            node4.startNodeServer();
+        });
+
+        node5.tournamentJoin();
+
+        node4.printNeighbors();
+
+        assertTrue(node4.getNeighbors().containsKey("Node5"));
+        assertTrue(node5.getNeighbors().containsKey("Node4"));
+    } 
+
+    @Test
+    public void testNodeLeave(){
+        TournamentNode node1 = new TournamentNode("Node1","localhost", 3001, "Node1/");
+        TournamentNode node2 = new TournamentNode("Node2","localhost", 3002, "Node2/");
+
+        node2.addNeighbor("Node1", "localhost", 3001);
+
+        //start node1
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            node1.startNodeServer();
+        });
+        
+        //il nuovo nodo è entrato nella rete
+        node2.tournamentJoin();
+        assertTrue(node1.getNeighbors().containsKey("Node2"));
+
+        //il nodo lascia la rete e non è più presente
+        node2.TournamentLeave();
+        assertFalse(node1.getNeighbors().containsKey("Node2"));
+
+        //la lista dei vicini del nodo che ha lasciato la rete deve essere vuota
+        assertTrue(node2.getNeighbors().isEmpty());
+
+    } 
 }

@@ -116,6 +116,10 @@ public class TournamentServer {
                 case "add_me":
                     result = this.addNeighbor(message);
                 break;
+                case "leave":
+                    //qui path contiene il nome del nodo da rimuovere
+                    result = this.removeNeighbor(path);
+                break;
                 default:
                     System.out.println("Operazione non valida");
                     break;
@@ -273,6 +277,16 @@ public class TournamentServer {
 
         tn.put(new_name, new TournamentNeighbor(new_address, new_port));
         return "Vicino aggiunto";
+    }
+
+    //metodo per rimuovere un vicino, nel risultato specifica se la rimozione è completa oppure se il nodo non era presente
+    public String removeNeighbor(String name){
+        if(!tn.containsKey(name)){
+            return "nodo non presente:"+this.name;
+        }
+        tn.remove(name);
+
+        return "node removed";
     }
 
     public String getName() {

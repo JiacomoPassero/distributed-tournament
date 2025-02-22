@@ -168,48 +168,85 @@ public class TournamentNode{
         if(result == "nome esistente")
             return "Operazione fallita: "+result;
         
-        //se il nome è univoco ho ricevuto la lista degli ID in formato stringa nel formato
-        //nome:indirizzo:porta::nome:indirizzo:porta....
-        //Trasformo la stringa in un array di stringhe
-        String[] nodes = result.split("::");
+        //se node non è vuoto inserisco nuovi nodi
+        if(!result.isEmpty()){
+             //se il nome è univoco ho ricevuto la lista degli ID in formato stringa nel formato
+            //nome:indirizzo:porta::nome:indirizzo:porta....
+            //Trasformo la stringa in un array di stringhe
+            String[] nodes = result.split("::");
+            String new_name, new_address, message_add_me;
+            int new_port;
+            String nodi_non_inseriti="";
+            for(String node : nodes){
+                new_name = node.split(":")[0];
+                new_address = node.split(":")[1];
+                new_port = Integer.parseInt(node.split(":")[2]);
+                
+                this.tn.put(new_name, new TournamentNeighbor(new_address, new_port));
+                //Invio anche una richiesta di essere aggiunto come vicino
+                message_add_me = "add_me"+":"+this.ts.getName()+":"+this.ts.getAddress()+":"+this.ts.getPort();
+                //System.out.println();
+                result = this.tc.sendRequest(message_add_me, new_address, new_port);
 
-        //inserisco i nuovi nodi
-        String new_name, new_address, message_add_me;
-        int new_port;
-        String nodi_non_inseriti="";
-        for(String node : nodes){
-            new_name = node.split(":")[0];
-            new_address = node.split(":")[1];
-            new_port = Integer.parseInt(node.split(":")[2]);
-            
-            this.tn.put(new_name, new TournamentNeighbor(new_address, new_port));
-            //Invio anche una richiesta di essere aggiunto come vicino
-            message_add_me = "add_me"+":"+this.ts.getName()+":"+this.ts.getAddress()+":"+this.ts.getPort();
-            //System.out.println();
-            result = this.tc.sendRequest(message_add_me, new_address, new_port);
-
-            if(result.equals("nodo esistente")){
-                if(!nodi_non_inseriti.isEmpty()){
-                     nodi_non_inseriti += "::";
+                if(result.equals("nodo esistente")){
+                    if(!nodi_non_inseriti.isEmpty()){
+                        nodi_non_inseriti += "::";
+                    }
+                    nodi_non_inseriti += new_name;
                 }
-                nodi_non_inseriti += new_name;
+        
             }
-    
-        }
 
-        if(!nodi_non_inseriti.isEmpty())
-            return "Node join completato. Errore nell'inseriento dei seguenti nodi:" + nodi_non_inseriti;
+            if(!nodi_non_inseriti.isEmpty())
+                return "Node join completato. Errore nell'inseriento dei seguenti nodi:" + nodi_non_inseriti;
 
-        else{
-            
+            else{
+                
+            }
         }
         return "Node join completato";
+    }
+
+    //metodo per fa lasciare un nodo alla rete: per ogni vicino, invia la richiesta di essere rimosso
+    //dato che siamo in un grafo completo è sufficiente ad essere rimossi dalla rete
+    public String TournamentLeave(){
+        String message, result;
+
+        //lista per segnare eventuali nodi da cui non si è stati rimossi 
+        String errore_rimozione="";
+
+        for(String key : this.tn.keySet()){
+            message = "leave"+":"+this.ts.getName();
+            //System.out.println();
+            result = this.tc.sendRequest(message, this.tn.get(key).getAddress(), this.tn.get(key).getPort());
+
+            if(!result.equals("node removed")){
+                if(!errore_rimozione.isEmpty()){
+                    errore_rimozione += "::";
+                }
+                //nel caso la rimozione non sia andata a buon fine viene segnalato su quale nodo c'è stato un problema
+                errore_rimozione+=result.split(":")[1];
+            }
+        }
+
+        if(!errore_rimozione.isEmpty()){
+            return "rimozione incompleta per nodi: " + errore_rimozione;
+        }
+
+        //avendo lasciato la rete con successo si procede a rimuovere tutti i vicini riallocando la lista
+        this.tn = new HashMap<String,TournamentNeighbor>();
+
+        return "node leave completato";
     }
 
     public void printNeighbors(){
         for (String key : tn.keySet()) {
             System.out.println(key+":"+ this.tn.get(key).getAddress()+":"+this.tn.get(key).getPort());
         }
+    }
+
+    public HashMap<String, TournamentNeighbor> getNeighbors() {
+        return tn;
     }
 
 }

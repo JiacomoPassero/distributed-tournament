@@ -31,6 +31,11 @@ public class ExecuteDemo {
         }
         //node 5 test join
         TournamentNode node5 = new TournamentNode("Node5", "localhost", 3005, "Node5/");
+        //start node5 server
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            node5.startNodeServer();
+        });
         //questo node join fallisce perchè non ci sono vicini da visitare
         System.out.println(node5.tournamentJoin());
         //aggiungo un vicino ad node2
@@ -48,6 +53,20 @@ public class ExecuteDemo {
             System.out.println(node5.readFile("file"+i+".txt", 0));
             node5.deleteFile("file"+i+".txt");
         }
+
+        //test di operazione su node 5
+        nodes.get(4).createFile("file5.txt", "Node5");
+        nodes.get(4).writeFile("file5.txt", "line 5");
+        nodes.get(4).deleteFile("file5.txt");
+
+        //leave node 5
+        node5.TournamentLeave();
+        //tnode 5 avendo lasciato la rete è sparito dal vicinato degli altri nodi
+        for(int i =0; i<num_nodes; i++){
+            System.out.println("Vicinato node "+i);
+            nodes.get(i).printNeighbors();
+        }
+
     }    
 
 }
