@@ -3,9 +3,12 @@ import Tournament.TournamentNode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
@@ -172,6 +175,28 @@ public class TestSet1{
 
         //la lista dei vicini del nodo che ha lasciato la rete deve essere vuota
         assertTrue(node2.getNeighbors().isEmpty());
+    } 
 
+    @Test
+    public void testServerStop(){
+        TournamentNode node1 = new TournamentNode("Node1","localhost", 3001, "Node1/");
+
+        //start node1
+        CompletableFuture.runAsync(() -> { 
+            // Handle the request 
+            node1.startNodeServer();
+        });
+        
+        //il nuovo nodo è entrato nella rete
+        node1.stopNodeServer();
+        //la porta non deve essere più occupata
+        try (ServerSocket serverSocket = new ServerSocket(3001)) {
+            serverSocket.setReuseAddress(true);  // Allow immediate reuse after closing
+           assertTrue(true);; // Port is free
+        } catch (IOException e) {
+            // Port is in use
+            fail();
+        }
+        
     } 
 }
