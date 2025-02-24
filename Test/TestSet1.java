@@ -179,7 +179,7 @@ public class TestSet1{
 
     @Test
     public void testServerStop(){
-        TournamentNode node1 = new TournamentNode("Node1","localhost", 3001, "Node1/");
+        TournamentNode node1 = new TournamentNode("Node1","localhost", 3007, "Node1/");
 
         //start node1
         CompletableFuture.runAsync(() -> { 
@@ -190,7 +190,7 @@ public class TestSet1{
         //il nuovo nodo è entrato nella rete
         node1.stopNodeServer();
         //la porta non deve essere più occupata
-        try (ServerSocket serverSocket = new ServerSocket(3001)) {
+        try (ServerSocket serverSocket = new ServerSocket(3007)) {
             serverSocket.setReuseAddress(true);  // Allow immediate reuse after closing
            assertTrue(true);; // Port is free
         } catch (IOException e) {
